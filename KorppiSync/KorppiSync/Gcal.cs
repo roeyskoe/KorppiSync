@@ -12,6 +12,9 @@ using System.Threading;
 using System.Threading.Tasks;
 namespace KorppiSync
 {
+    /// <summary>
+    /// Vastaa Googlen kalenterin kanssa kommunikoinnista.
+    /// </summary>
     public class Gcal
     {
         public CalendarService service;

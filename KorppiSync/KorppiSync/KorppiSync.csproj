@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,10 +7,14 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Calendar.v3" Version="1.50.0.2237" />
+    <PackageReference Include="PuppeteerSharp" Version="2.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="credentials.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
