@@ -20,20 +20,47 @@ namespace KorppiSync
         static KorppiCal KorppiCal;
         public static async Task Main()
         {
-            
-            GoogleCalendar = new Gcal();
-            KorppiCal = new KorppiCal();
-            /*
-            GoogleCalendar.CreateEvent("Testitapahtuma", new DateTime(2021, 3, 6, 15, 0, 0), new DateTime(2021, 3, 6, 16, 0, 0), "4");
-            Console.WriteLine("a");
-            */
-            var data = JsonSerializer.Deserialize<Dictionary<string, string>>(System.IO.File.ReadAllText("settings.json"));
+            var data = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("settings.json"));
 
-            await KorppiCal.GetKorppiCal(data["korppiUser"], data["korppiPass"]);
+            GoogleCalendar = new Gcal(data["calendarId"]);
+            KorppiCal = new KorppiCal();
+            
+            List<Kalenterimerkinta> kalenterimerkinnat = await KorppiCal.GetKorppiCal(data["korppiUser"], data["korppiPass"]);
+
+            Console.WriteLine("Lisätään kalenteriin...");
+            Events events = GoogleCalendar.GetEvents();
+
+            foreach (var kalenterimerkinta in kalenterimerkinnat)
+            {
+                Event e = EventByDate(events, kalenterimerkinta.AlkuAika);
+                if(e is null)
+                {
+                    GoogleCalendar.CreateEvent(kalenterimerkinta.Otsikko, kalenterimerkinta.AlkuAika, kalenterimerkinta.LoppuAika, kalenterimerkinta.VariId);
+                }
+                else
+                {
+                    e.Summary = kalenterimerkinta.Otsikko;
+                    e.ColorId = kalenterimerkinta.VariId;
+                    GoogleCalendar.UpdateEvent(e);
+                }
+            }
 
             Console.WriteLine("valmis");
-
         }
 
+        /// <summary>
+        /// Onko kyseiselle ajanhetkelle jo olemassa tapahtumaa
+        /// </summary>
+        /// <param name="events">Tapahtumat</param>
+        /// <param name="date">ajanhetki</param>
+        /// <returns>tapahtuma jos sellainen on, muuten null</returns>
+        public static Event EventByDate(Events events, DateTime date)
+        {
+            foreach (var item in events.Items)
+            {
+                if (item.Start.DateTime == date) return item;
+            }
+            return null;
+        }
     }
 }

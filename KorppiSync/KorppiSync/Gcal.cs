@@ -18,14 +18,16 @@ namespace KorppiSync
     public class Gcal
     {
         public CalendarService service;
-        static string[] Scopes = { CalendarService.Scope.CalendarEvents };
+        static string[] Scopes = { CalendarService.Scope.CalendarEvents }; // Ohjelman toimivaltuudet
         static string ApplicationName = "Korpin kalenterisynkronointi Googlekalenteriin";
+        string calendarId;
 
         /// <summary>
         /// Initialisoidaan googlekalenteri
         /// </summary>
-        public Gcal()
+        public Gcal(string calendarId)
         {
+            this.calendarId = calendarId;
             UserCredential credential;
 
             using (var stream =
@@ -58,7 +60,7 @@ namespace KorppiSync
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="colorId"></param>
-        public void CreateEvent(string title, DateTime start, DateTime end, string colorId = "1")
+        public Event CreateEvent(string title, DateTime start, DateTime end, string colorId = "1", bool noinsert = false)
         {
             Event e = new Event();
             e.Summary = title;
@@ -72,13 +74,31 @@ namespace KorppiSync
             e.End = ed2;
 
             e.ColorId = colorId;
-            service.Events.Insert(e, "primary").Execute();
+            if(!noinsert)
+                service.Events.Insert(e, calendarId).Execute();
+            return e;
         }
 
-        public Events GetEvents(string calendarId = "primary", int maxResults = 100)
+        /// <summary>
+        /// Päivittää tapahtuman tiedot.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="calendarId"></param>
+        public void UpdateEvent(Event e)
+        {
+            service.Events.Update(e, calendarId, e.Id).Execute();
+        }
+
+        /// <summary>
+        /// Hakee tapahtumat meneillään olevalta viikolta ja sitä uudemmat.
+        /// </summary>
+        /// <param name="calendarId">KalenteriID</param>
+        /// <param name="maxResults"></param>
+        /// <returns></returns>
+        public Events GetEvents(int maxResults = 100)
         {
             EventsResource.ListRequest request = service.Events.List(calendarId);
-            request.TimeMin = DateTime.Now;
+            request.TimeMin = DateTime.Now.AddDays(-7);
             request.ShowDeleted = false;
             request.SingleEvents = true;
             request.MaxResults = maxResults;
