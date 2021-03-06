@@ -12,11 +12,11 @@ https://developers.google.com/calendar/quickstart/dotnet
 
 Suorita sivun ohjeiden kohta 1.
 
-Tallenna ladattu `credentials.json` `korppiSync`-kansioon, missä ohjelman muutkin kooditiedostot sijaitsevat.
+Tallenna ladattu `credentials.json` `KorppiSync/KorppiSync`-kansioon, missä ohjelman muutkin kooditiedostot sijaitsevat.
 
 ### 2.
 
-Mene osoitteeseen calendar.google.com ja luo itsellesi uusi kalenteri johon tapahtumat lisätään.
+Mene osoitteeseen [calendar.google.com](calendar.google.com) ja luo itsellesi uusi kalenteri johon tapahtumat lisätään.
 
 Kalenterin nimellä ei ole väliä.
 
@@ -26,7 +26,7 @@ Luodun kalenterin asetuksista löytyy "Integrate calendar" otsikon alta kalenter
 
 ### 3. 
 
-Luo sinne samaiseen `KorppiSync`-kansioon vielä `Settings.json`, jonka sisältö on mallia:
+Luo sinne samaiseen `KorppiSync/KorppiSync`-kansioon vielä `Settings.json`, jonka sisältö on mallia:
 
 ```
 {
