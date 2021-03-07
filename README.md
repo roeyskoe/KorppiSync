@@ -10,9 +10,11 @@ Ota itsellesi käyttöön Googlen kalenteri-api:
 
 https://developers.google.com/calendar/quickstart/dotnet
 
+Projektin nimellä ei ole merkitystä, valitse tyypiksi "Desktop App"
+
 Suorita sivun ohjeiden kohta 1.
 
-Tallenna ladattu `credentials.json` `KorppiSync/KorppiSync`-kansioon, missä ohjelman muutkin kooditiedostot sijaitsevat.
+Tallenna ladattu `credentials.json` `KorppiSync/KorppiSync` kansiosta löytyvän vastaavan nimisen tiedoston päälle.
 
 ### 2.
 
@@ -26,7 +28,7 @@ Luodun kalenterin asetuksista löytyy "Integrate calendar" otsikon alta kalenter
 
 ### 3. 
 
-Luo sinne samaiseen `KorppiSync/KorppiSync`-kansioon vielä `Settings.json`, jonka sisältö on mallia:
+Muokkaa `KorppiSync/KorppiSync`-kansiosta valmiiksi löytyvän `Settings.json` -tiedoston sisältö oikeaksi:
 
 ```
 {
