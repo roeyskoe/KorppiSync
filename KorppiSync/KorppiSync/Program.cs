@@ -22,7 +22,8 @@ namespace KorppiSync
         {
             var data = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("settings.json"));
 
-            GoogleCalendar = new Gcal(data["calendarId"]);
+            // Muuta falseksi jos ajetaan koneella jolla on nettiselain käytettävissä helpompaa autentikointia varten.
+            GoogleCalendar = new Gcal(data["calendarId"], true);
             KorppiCal = new KorppiCal();
             
             List<Kalenterimerkinta> kalenterimerkinnat = await KorppiCal.GetKorppiCal(data["korppiUser"], data["korppiPass"]);
