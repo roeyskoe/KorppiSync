@@ -60,10 +60,11 @@ namespace KorppiSync
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="colorId"></param>
-        public Event CreateEvent(string title, DateTime start, DateTime end, string colorId = "1", bool noinsert = false)
+        public Event CreateEvent(string title, string location, DateTime start, DateTime end, string colorId = "1", bool noinsert = false)
         {
             Event e = new Event();
             e.Summary = title;
+            e.Location = location;
 
             EventDateTime ed1 = new EventDateTime();
             ed1.DateTime = start;
