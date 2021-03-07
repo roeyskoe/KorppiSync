@@ -114,6 +114,10 @@ namespace KorppiSync
 
                 Kalenterimerkinta km = new Kalenterimerkinta(alkuaika, loppuaika, rivisplit[sarakehakutaulu["Nimi"]]);
 
+                if (sarakehakutaulu.ContainsKey("Paikka") && rivisplit[sarakehakutaulu["Paikka"]] != "")
+                {
+                    km.Paikka = rivisplit[sarakehakutaulu["Paikka"]];
+                }
                 if (sarakehakutaulu.ContainsKey("Kurssi") && rivisplit[sarakehakutaulu["Kurssi"]] != "")
                 {
                     km.Otsikko = rivisplit[sarakehakutaulu["Kurssi"]] + " " + rivisplit[sarakehakutaulu["Nimi"]];

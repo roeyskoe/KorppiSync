@@ -25,7 +25,9 @@ namespace KorppiSync
         /// <summary>
         /// Initialisoidaan googlekalenteri
         /// </summary>
-        public Gcal(string calendarId)
+        /// <param name="calendarId">Kalenterin id</param>
+        /// <param name="headless">Jos laitteella ei ole käytettävissä selainta, autentikointi tehdään komentorivin kautta.</param>
+        public Gcal(string calendarId, bool headless = false)
         {
             this.calendarId = calendarId;
             UserCredential credential;
@@ -41,7 +43,8 @@ namespace KorppiSync
                     Scopes,
                     "user",
                     CancellationToken.None,
-                    new FileDataStore(credPath, true)).Result;
+                    new FileDataStore(credPath, true),
+                    headless ? new PromptCodeReceiver() : null).Result;
                 Console.WriteLine("Credential file saved to: " + credPath);
             }
 
