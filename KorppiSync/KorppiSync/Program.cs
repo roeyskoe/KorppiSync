@@ -35,13 +35,14 @@ namespace KorppiSync
                 Event e = EventByDate(events, kalenterimerkinta.AlkuAika);
                 if(e is null)
                 {
-                    GoogleCalendar.CreateEvent(kalenterimerkinta.Otsikko, kalenterimerkinta.Paikka, kalenterimerkinta.AlkuAika, kalenterimerkinta.LoppuAika, kalenterimerkinta.VariId);
+                    GoogleCalendar.CreateEvent(kalenterimerkinta.Otsikko, kalenterimerkinta.Paikka, kalenterimerkinta.Kuvaus, kalenterimerkinta.AlkuAika, kalenterimerkinta.LoppuAika, kalenterimerkinta.VariId);
                 }
                 else
                 {
                     e.Summary = kalenterimerkinta.Otsikko;
                     e.ColorId = kalenterimerkinta.VariId;
                     e.Location = kalenterimerkinta.Paikka;
+                    e.Description = kalenterimerkinta.Kuvaus;
                     GoogleCalendar.UpdateEvent(e);
                 }
             }

@@ -92,23 +92,43 @@ namespace KorppiSync
             List<Kalenterimerkinta> kalenteri = new();
 
             string[] ajat = teksti.Split("\n");
-            
-            foreach (var rivi in ajat)
+            string[] sarakkeet = ajat[0].Split("\t");
+
+            Dictionary<string, int> sarakehakutaulu = new Dictionary<string, int>(); // Mikä tieto löytyy mistäkin sarakkeesta
+            for (int i = 0; i < sarakkeet.Length; i++)
             {
+                sarakehakutaulu.Add(sarakkeet[i], i);
+            }
+             // Sarakkaita vaikuttaisi aina (onko varmasti?) olevan vähintään Pvm, Aika, Nimi, Paikka
+             // Mutta niitä voi olla datasta riippuen(?) ainakin Pvm, Aika, Kurssi, Nimi, Ryhmä, Paikka, Henkilö
+            
+            foreach (var rivi in ajat[1..])
+            {
+
                 string[] rivisplit = rivi.Split("\t");
-                string[] kellot = rivisplit[1].Split(" - ");
-                string[][] pvmt = new string[][] { rivisplit[0].Split("."), kellot[0].Split(":"), kellot[1].Split(":") };
+                string[] kellot = rivisplit[sarakehakutaulu["Aika"]].Split(" - ");
+                string[][] pvmt = new string[][] { rivisplit[sarakehakutaulu["Pvm"]].Split("."), kellot[0].Split(":"), kellot[1].Split(":") };
 
                 DateTime alkuaika = new DateTime(int.Parse(pvmt[0][2]), int.Parse(pvmt[0][1]), int.Parse(pvmt[0][0]), int.Parse(pvmt[1][0]), int.Parse(pvmt[1][1]), 0);
                 DateTime loppuaika = new DateTime(int.Parse(pvmt[0][2]), int.Parse(pvmt[0][1]), int.Parse(pvmt[0][0]), int.Parse(pvmt[2][0]), int.Parse(pvmt[2][1]), 0);
 
-                Kalenterimerkinta km;
-                if (rivisplit.Length > 2)
-                    km = new Kalenterimerkinta(alkuaika, loppuaika, rivisplit[2], rivisplit[3]);
-                else
-                    km = new Kalenterimerkinta(alkuaika, loppuaika, rivisplit[2], "");
+                Kalenterimerkinta km = new Kalenterimerkinta(alkuaika, loppuaika, rivisplit[sarakehakutaulu["Nimi"]]);
 
-                if (rivisplit[2] != "Varattava aika")
+                if (sarakehakutaulu.ContainsKey("Kurssi") && rivisplit[sarakehakutaulu["Kurssi"]] != "")
+                {
+                    km.Otsikko = rivisplit[sarakehakutaulu["Kurssi"]] + " " + rivisplit[sarakehakutaulu["Nimi"]];
+                }
+                if (sarakehakutaulu.ContainsKey("Ryhmä") && rivisplit[sarakehakutaulu["Ryhmä"]] != "")
+                {
+                    km.Otsikko += " " + rivisplit[sarakehakutaulu["Ryhmä"]];
+                }
+                if (sarakehakutaulu.ContainsKey("Henkilö") && rivisplit[sarakehakutaulu["Henkilö"]] != "")
+                {
+                    km.Kuvaus = rivisplit[sarakehakutaulu["Henkilö"]];
+                }
+
+                // Googlen kalenterin väri-id:t on numero tekstinä väliltä 1-12
+                if (rivisplit[sarakehakutaulu["Nimi"]] != "Varattava aika")
                 {
                     km.Varattu = false;
                     km.VariId = "11";
@@ -118,6 +138,7 @@ namespace KorppiSync
                     km.Varattu = true;
                     km.VariId = "10";
                 }
+
                 kalenteri.Add(km);
             }
             
@@ -133,17 +154,17 @@ namespace KorppiSync
     {
         public DateTime AlkuAika;
         public DateTime LoppuAika;
-        public string Otsikko;
-        public string Paikka;
-        public string VariId;
-        public bool Varattu;
+        public string Otsikko = "";
+        public string Kuvaus = "";
+        public string Paikka = "";
+        public string VariId = "";
+        public bool Varattu = false;
 
-        public Kalenterimerkinta(DateTime alku, DateTime loppu, string otsikko, string paikka)
+        public Kalenterimerkinta(DateTime alku, DateTime loppu, string otsikko)
         {
             AlkuAika = alku;
             LoppuAika = loppu;
             Otsikko = otsikko;
-            Paikka = paikka;
         }
     }
 
