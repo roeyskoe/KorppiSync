@@ -27,9 +27,9 @@ namespace KorppiSync
         /// <returns></returns>
         private async Task Init()
         {
-            if(!Directory.Exists(".local-chromium"))
+            if (!Directory.Exists(".local-chromium"))
                 Console.WriteLine("Selainta ladataan, tässä kestää hetki...");
-            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
+            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
 
             Console.WriteLine("Käynnistetään selain...");
             var browser = await Puppeteer.LaunchAsync(new LaunchOptions
@@ -47,37 +47,61 @@ namespace KorppiSync
         /// <returns></returns>
         public async Task<List<Kalenterimerkinta>> GetKorppiCal(string user, string pass)
         {
-            NavigationOptions navi = new NavigationOptions();
-            navi.WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 };
+            string tekstit = "";
+            // Jos jossain menee jokin pieleen, tallennetaan sivun screenshot ja html sisältö.
+            try
+            {
+                NavigationOptions navi = new NavigationOptions();
+                navi.WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 };
 
-            Console.WriteLine("Avataan korppi");
+                Console.WriteLine("Avataan korppi");
 
-            await page.GoToAsync("https://korppi.jyu.fi", navi);
-            var navigationTask = page.WaitForNavigationAsync();
+                await page.GoToAsync("https://korppi.jyu.fi", navi);
+                var navigationTask = page.WaitForNavigationAsync();
 
-            await page.ClickAsync("#toOpenId");
-            await navigationTask;
+                await page.ClickAsync("#toOpenId");
+                await navigationTask;
 
-            Console.WriteLine("Kirjaudutaan sisään");
-            await page.TypeAsync("#username", user);
-            await page.TypeAsync("#password", pass);
-            navigationTask = page.WaitForNavigationAsync();
-            await page.ClickAsync("#loginbutton");
-            await navigationTask;
+                Console.WriteLine("Kirjaudutaan sisään");
+                await page.TypeAsync("#username", user);
+                await page.TypeAsync("#password", pass);
+                navigationTask = page.WaitForNavigationAsync();
 
-            Console.WriteLine("Avataan kalenteri");
+                await page.ClickAsync("#loginbutton");
+                await navigationTask;
 
-            DateTime nyt = DateTime.Now;
-            DateTime loppuAika = nyt.AddMonths(1); // Haetaan tapahtumia kuukausi eteenpäin tästä hetkestä.
-            string nytstr = nyt.ToString("dd.MM.yyyy");
-            string loppustr = loppuAika.ToString("dd.MM.yyyy");
-            string url = $"https://korppi.jyu.fi/kotka/calendar/calendar.jsp?date={nytstr}&enddate={loppustr}&type=list";
+                Console.WriteLine("Avataan kalenteri");
 
-            await page.GoToAsync(url, navi);
+                DateTime nyt = DateTime.Now;
+                DateTime loppuAika = nyt.AddMonths(1); // Haetaan tapahtumia kuukausi eteenpäin tästä hetkestä.
+                string nytstr = nyt.ToString("dd.MM.yyyy");
+                string loppustr = loppuAika.ToString("dd.MM.yyyy");
+                string url = $"https://korppi.jyu.fi/kotka/calendar/calendar.jsp?date={nytstr}&enddate={loppustr}&type=list";
 
-            //await page.ScreenshotAsync("testi.png");
-            // Suoritetaan sivulla vähän javascriptiä jotta saadaan kalenteridata mukavammassa muodossa
-            string tekstit = (await page.EvaluateExpressionAsync(File.ReadAllText("kalenteri.js"))).ToString();
+                await page.GoToAsync(url, navi);
+
+                // Suoritetaan sivulla vähän javascriptiä jotta saadaan kalenteridata mukavammassa muodossa
+                tekstit = (await page.EvaluateExpressionAsync(File.ReadAllText("kalenteri.js"))).ToString();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(Environment.NewLine + Environment.NewLine);
+                string virhekuvanNimi = "error.png";
+                string virheHtml = "error.html";
+
+                await page.ScreenshotAsync(virhekuvanNimi);
+                File.WriteAllText(virheHtml, page.GetContentAsync().Result);
+
+                Console.WriteLine("Jokin meni korpin sisällön käsittelyssä.");
+                Console.WriteLine($"Kuvankaappaus sivusta on tallennettu: {Directory.GetCurrentDirectory()}/{virhekuvanNimi}");
+                Console.WriteLine($"Virheen aiheuttaneen sivun html on: {Directory.GetCurrentDirectory()}/{virheHtml}");
+
+                Console.WriteLine(Environment.NewLine + Environment.NewLine);
+                Console.WriteLine(e);
+                Console.WriteLine(Environment.NewLine + Environment.NewLine);
+
+                Environment.Exit(1);
+            }
 
             Console.WriteLine("parsitaan...");
             return Format(tekstit);
@@ -99,9 +123,9 @@ namespace KorppiSync
             {
                 sarakehakutaulu.Add(sarakkeet[i], i);
             }
-             // Sarakkaita vaikuttaisi aina (onko varmasti?) olevan vähintään Pvm, Aika, Nimi, Paikka
-             // Mutta niitä voi olla datasta riippuen(?) ainakin Pvm, Aika, Kurssi, Nimi, Ryhmä, Paikka, Henkilö
-            
+            // Sarakkaita vaikuttaisi aina (onko varmasti?) olevan vähintään Pvm, Aika, Nimi, Paikka
+            // Mutta niitä voi olla datasta riippuen(?) ainakin Pvm, Aika, Kurssi, Nimi, Ryhmä, Paikka, Henkilö
+
             foreach (var rivi in ajat[1..])
             {
 
@@ -145,7 +169,7 @@ namespace KorppiSync
 
                 kalenteri.Add(km);
             }
-            
+
             return kalenteri;
         }
 
